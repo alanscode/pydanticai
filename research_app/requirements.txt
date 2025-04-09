@@ -1,0 +1,18 @@
+# Core Dependencies
+langchain==0.3.23
+langgraph==0.3.25
+pydantic==2.11.2 # Specify version 2+ for TypedDict compatibility if needed
+python-dotenv==1.1.0
+
+# LLM Provider
+langchain-openai==0.3.12
+
+# Search Tool Provider
+tavily-python==0.5.3
+
+# PydanticAI for structured output generation
+pydantic-ai==0.0.24
+
+# Testing Framework (Optional, but good practice)
+pytest==8.3.5
+pytest-mock==3.14.0
