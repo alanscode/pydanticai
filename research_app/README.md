@@ -2,20 +2,19 @@
 
 ## 1. Overview
 
-This application automates the process of researching a given topic (query) using online search tools and generating a concise summary using a Large Language Model (LLM). It leverages the `langchain` and `langgraph` libraries to create a robust workflow (graph) that orchestrates the research and summarization steps.
+This application automates the process of researching a given topic (query) using online search tools and generating a concise summary using a Large Language Model (LLM). It leverages the `langchain` and `langgraph` libraries to create a robust workflow (graph) that orchestrates the research and summarization steps. Building this app to help me learn the basics of langgraph and pydantic AI frameworks.
 
 ## 2. Features
 
-*   Accepts a user query as input.
-*   Uses a configured search tool (e.g., Tavily) to find relevant information.
-*   Utilizes a configured LLM (e.g., OpenAI's GPT models) to process search results and generate a summary.
-*   Handles configuration via environment variables.
-*   Provides error handling and status messages during execution.
+- Accepts a user query as input.
+- Uses a configured search tool (e.g., Tavily) to find relevant information.
+- Utilizes a configured LLM (e.g., OpenAI's GPT models) to process search results and generate a summary.
+- Handles configuration via environment variables.
+- Provides error handling and status messages during execution.
 
 ## 3. Architecture & Workflow
 
 The application follows a defined sequence of steps orchestrated by a `langgraph` graph:
-
 
 **Workflow Steps:**
 
@@ -29,9 +28,9 @@ The application follows a defined sequence of steps orchestrated by a `langgraph
 
 ### Prerequisites
 
-*   Python 3.10+
-*   Python 3.10+
-*   `uv` (Python package installer and virtual environment manager - install via `pip install uv` or see [uv documentation](https://github.com/astral-sh/uv))
+- Python 3.10+
+- Python 3.10+
+- `uv` (Python package installer and virtual environment manager - install via `pip install uv` or see [uv documentation](https://github.com/astral-sh/uv))
 
 ### Installation
 
@@ -53,11 +52,13 @@ The application follows a defined sequence of steps orchestrated by a `langgraph
     cp .env.example .env
     ```
 2.  **Edit the `.env` file:**
-    *   Replace `"YOUR_GOOGLE_API_KEY_HERE"` with your actual Google Generative AI API key.
-    *   Replace `"YOUR_BRAVE_API_KEY_HERE"` with your actual Brave Search API key.
-    *   (Optional) Set `GOOGLE_LLM_MODEL_NAME` if you want to use a Google model other than the default (`gemini-2.5-pro-preview-03-25`).
+
+    - Replace `"YOUR_GOOGLE_API_KEY_HERE"` with your actual Google Generative AI API key.
+    - Replace `"YOUR_BRAVE_API_KEY_HERE"` with your actual Brave Search API key.
+    - (Optional) Set `GOOGLE_LLM_MODEL_NAME` if you want to use a Google model other than the default (`gemini-2.5-pro-preview-03-25`).
 
     **Example `.env`:**
+
     ```dotenv
     # Environment variables for the Research & Summary Application
 
@@ -73,6 +74,7 @@ The application follows a defined sequence of steps orchestrated by a `langgraph
     # --- Optional Configuration ---
     # EXAMPLE_SETTING="example_value"
     ```
+
     **Note:** Never commit your actual `.env` file with secret keys to version control.
 
 ## 5. Usage
@@ -99,14 +101,14 @@ The application will print status updates and the final summary (or errors) to t
 
 ## 6. Code Structure
 
-*   **`research_app/`**: Main application package.
-    *   **`main.py`**: Entry point of the application. Orchestrates loading settings, building the graph, and running the query.
-    *   **`config.py`**: Handles loading and validation of application settings from environment variables.
-    *   **`requirements.txt`**: Lists Python dependencies.
-    *   **`.env.example`**: Template for the required environment variables.
-    *   **`agents/`**: Contains the core logic for different agents (e.g., `researcher.py`, `summarizer.py`) used as nodes in the graph.
-        *   `schemas.py`: Defines data structures (using Pydantic) for agent inputs/outputs.
-    *   **`graph/`**: Defines the `langgraph` structure.
-        *   `builder.py`: Contains the function to construct and connect the graph nodes (agents).
-        *   `state.py`: Defines the shared state object passed between graph nodes.
-    *   **`tests/`**: Contains unit and integration tests for the application components.
+- **`research_app/`**: Main application package.
+  - **`main.py`**: Entry point of the application. Orchestrates loading settings, building the graph, and running the query.
+  - **`config.py`**: Handles loading and validation of application settings from environment variables.
+  - **`requirements.txt`**: Lists Python dependencies.
+  - **`.env.example`**: Template for the required environment variables.
+  - **`agents/`**: Contains the core logic for different agents (e.g., `researcher.py`, `summarizer.py`) used as nodes in the graph.
+    - `schemas.py`: Defines data structures (using Pydantic) for agent inputs/outputs.
+  - **`graph/`**: Defines the `langgraph` structure.
+    - `builder.py`: Contains the function to construct and connect the graph nodes (agents).
+    - `state.py`: Defines the shared state object passed between graph nodes.
+  - **`tests/`**: Contains unit and integration tests for the application components.
