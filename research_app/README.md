@@ -30,15 +30,20 @@ The application follows a defined sequence of steps orchestrated by a `langgraph
 ### Prerequisites
 
 *   Python 3.10+
-*   `pip` (Python package installer)
+*   Python 3.10+
+*   `uv` (Python package installer and virtual environment manager - install via `pip install uv` or see [uv documentation](https://github.com/astral-sh/uv))
 
 ### Installation
 
 1.  **Clone the repository (if applicable).**
 2.  **Navigate to the `research_app` directory.**
-3.  **Install dependencies:**
+3.  **Create a virtual environment using `uv`:**
     ```bash
-    pip install -r requirements.txt
+    uv venv
+    ```
+4.  **Install dependencies using `uv` (this uses the virtual environment automatically):**
+    ```bash
+    uv pip install -r requirements.txt
     ```
 
 ### Environment Variables
@@ -48,22 +53,22 @@ The application follows a defined sequence of steps orchestrated by a `langgraph
     cp .env.example .env
     ```
 2.  **Edit the `.env` file:**
-    *   Replace `"YOUR_LLM_API_KEY_HERE"` with your actual API key for the chosen Language Model (e.g., OpenAI).
-    *   Replace `"YOUR_SEARCH_API_KEY_HERE"` with your actual API key for the chosen Search Tool (e.g., Tavily).
-    *   (Optional) Uncomment and set `LLM_MODEL_NAME` if you want to use a model other than the default (`gpt-3.5-turbo`).
+    *   Replace `"YOUR_GOOGLE_API_KEY_HERE"` with your actual Google Generative AI API key.
+    *   Replace `"YOUR_BRAVE_API_KEY_HERE"` with your actual Brave Search API key.
+    *   (Optional) Set `GOOGLE_LLM_MODEL_NAME` if you want to use a Google model other than the default (`gemini-2.5-pro-preview-03-25`).
 
     **Example `.env`:**
     ```dotenv
     # Environment variables for the Research & Summary Application
 
-    # --- Language Model Configuration ---
-    LLM_API_KEY="sk-..." # Your actual OpenAI key
+    # --- Google Generative AI Configuration ---
+    GOOGLE_API_KEY="YOUR_GOOGLE_API_KEY_HERE"
 
-    # Optional: Specify the model name
-    # LLM_MODEL_NAME="gpt-4-turbo-preview"
+    # Optional: Specify the Google LLM model name
+    # GOOGLE_LLM_MODEL_NAME="gemini-1.5-pro-latest"
 
-    # --- Search Tool Configuration ---
-    SEARCH_API_KEY="tvly-..." # Your actual Tavily key
+    # --- Brave Search Configuration ---
+    BRAVE_API_KEY="YOUR_BRAVE_API_KEY_HERE"
 
     # --- Optional Configuration ---
     # EXAMPLE_SETTING="example_value"
@@ -72,14 +77,22 @@ The application follows a defined sequence of steps orchestrated by a `langgraph
 
 ## 5. Usage
 
-Run the application from the parent directory of `research_app` using the Python module execution flag (`-m`):
+Run the application from the **parent directory** (`pydanticai/`) using the Python interpreter located inside the virtual environment and the module execution flag (`-m`):
 
 ```bash
+# On Windows (PowerShell/CMD):
 # Use a default query
-python -m research_app.main
+.\research_app\.venv\Scripts\python.exe -m research_app.main
 
 # Provide your own query
-python -m research_app.main "What are the latest advancements in quantum computing?"
+.\research_app\.venv\Scripts\python.exe -m research_app.main "Your query here"
+
+# On macOS/Linux (Bash/Zsh):
+# Use a default query
+./research_app/.venv/bin/python -m research_app.main
+
+# Provide your own query
+./research_app/.venv/bin/python -m research_app.main "Your query here"
 ```
 
 The application will print status updates and the final summary (or errors) to the console.
