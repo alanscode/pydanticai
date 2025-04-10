@@ -5,10 +5,10 @@ pydantic==2.11.2 # Specify version 2+ for TypedDict compatibility if needed
 python-dotenv==1.1.0
 
 # LLM Provider
-langchain-openai==0.3.12
+langchain-google-genai # Replaced OpenAI with Google GenAI
 
 # Search Tool Provider
-tavily-python==0.5.3
+# tavily-python==0.5.3 # Removed, using Brave Search via requests now
 
 # PydanticAI for structured output generation
 pydantic-ai==0.0.24

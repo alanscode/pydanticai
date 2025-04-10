@@ -1,8 +1,8 @@
 import os
+import requests # Added for making HTTP requests
 from typing import List
 # Removed PydanticAI import as it's not used here
-from langchain_openai.chat_models import ChatOpenAI
-from tavily import TavilyClient
+# Removed TavilyClient import
 
 from .schemas import ResearchResult
 from ..config import app_settings, AppSettings # Import app_settings instance and the class for type hinting
@@ -13,28 +13,19 @@ from ..config import app_settings, AppSettings # Import app_settings instance an
 # Test Case: Test initialization failure if settings are invalid/missing.
 # --- End TDD Anchor ---
 class ResearcherAgent:
-    """Agent responsible for performing web searches using Tavily."""
-    # llm: PydanticAI # Removed - LLM instance not directly used by researcher currently
-    search_tool: TavilyClient
+    """Agent responsible for performing web searches using the Brave Search API."""
+    # No specific search tool client needed, will use requests directly
+    brave_api_key: str # Store the API key
 
     def __init__(self, settings: AppSettings):
         """Initializes the Researcher Agent with necessary configurations."""
-        if not settings or not settings.llm_api_key or not settings.search_api_key:
-             raise ValueError("Valid settings object with LLM and Search API keys is required for ResearcherAgent initialization.")
-        print("Initializing Researcher Agent...")
+        # Updated check for Google and Brave API keys from config
+        if not settings or not settings.google_api_key or not settings.brave_api_key:
+             raise ValueError("Valid settings object with Google and Brave API keys is required for ResearcherAgent initialization.")
+        print("Initializing Researcher Agent (using Brave Search)...")
 
-        # Initialize the LangChain LLM first
-        openai_llm = ChatOpenAI(
-            model=settings.llm_model_name,
-            api_key=settings.llm_api_key,
-            temperature=0.1 # Lower temperature for more factual research/search
-        )
-        # PydanticAI wraps the LangChain LLM for structured output, but we don't need it for the search step itself.
-        # We might use it if we wanted the *researcher* to structure the raw results, but here it just searches.
-        # self.llm = PydanticAI(llm=openai_llm) # Removed - LLM instance not directly used by researcher currently
-
-        # Initialize the Search Tool
-        self.search_tool = TavilyClient(api_key=settings.search_api_key)
+        # Store the Brave API key from settings
+        self.brave_api_key = settings.brave_api_key
         print("Researcher Agent Initialized.")
 
     # --- TDD Anchor: test_researcher_run ---
@@ -43,29 +34,47 @@ class ResearcherAgent:
     # Test Case: Handle search tool API errors.
     # --- End TDD Anchor ---
     def run(self, query: str) -> ResearchResult:
-        """Performs web search based on the query using Tavily."""
-        print(f"Researcher Agent: Starting research for query: '{query}'")
+        """Performs web search based on the query using the Brave Search API."""
+        print(f"Researcher Agent: Starting research for query: '{query}' using Brave Search")
         results_list: List[str] = []
         combined_content = ""
+
+        search_url = "https://api.search.brave.com/res/v1/web/search"
+        headers = {
+            "Accept": "application/json",
+            "Accept-Encoding": "gzip",
+            "X-Subscription-Token": self.brave_api_key
+        }
+        params = {
+            "q": query,
+            "count": 5 # Number of results to fetch
+        }
+
         try:
-            # Use the Tavily search tool
-            # Note: TavilyClient.search returns a dict, typically {'results': [...]}
-            # where each item in results has 'title', 'url', 'content', 'score', 'raw_content'
-            search_output = self.search_tool.search(query=query, search_depth="basic", max_results=5) # Use basic for speed, can be advanced
+            response = requests.get(search_url, headers=headers, params=params, timeout=10)
+            response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
 
-            if search_output and 'results' in search_output:
-                # Extract content from Tavily results
-                results_list = [str(result.get('content', '')) for result in search_output['results'] if result.get('content')]
-                combined_content = "\n\n---\n\n".join(results_list) # Use more distinct separator
-                print(f"Researcher Agent: Found {len(results_list)} results.")
+            data = response.json()
+            search_results = data.get('web', {}).get('results', [])
+
+            if search_results:
+                # Extract description/snippet from Brave results
+                # Adjust the key if Brave uses a different field name (e.g., 'snippet')
+                results_list = [str(result.get('description', '')) for result in search_results if result.get('description')]
+                combined_content = "\n\n---\n\n".join(results_list)
+                print(f"Researcher Agent: Found {len(results_list)} results via Brave Search.")
             else:
-                print("Researcher Agent: No results found by Tavily.")
+                print("Researcher Agent: No results found by Brave Search.")
+                combined_content = f"No search results found for '{query}' via Brave Search."
 
+        except requests.exceptions.RequestException as e:
+            error_msg = f"Error during Brave Search API request: {e}"
+            print(f"ERROR: Researcher Agent failed for '{query}': {error_msg}")
+            combined_content = error_msg
         except Exception as e:
-            print(f"ERROR: Researcher Agent failed during Tavily search for '{query}': {e}")
-            # Return empty results but include error message in raw_content for visibility
-            results_list = []
-            combined_content = f"Error during Tavily search: {e}"
+            error_msg = f"An unexpected error occurred during Brave search: {e}"
+            print(f"ERROR: Researcher Agent failed for '{query}': {error_msg}")
+            combined_content = error_msg
 
         research_data = ResearchResult(
             query=query,

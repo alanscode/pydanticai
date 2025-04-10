@@ -11,9 +11,9 @@ from dotenv import load_dotenv
 # --- End TDD Anchor ---
 class AppSettings(BaseModel):
     """Application settings loaded from environment variables."""
-    llm_api_key: str = Field(..., description="API Key for the Language Model")
-    search_api_key: str = Field(..., description="API Key for the Search Tool")
-    llm_model_name: str = Field(default="gpt-3.5-turbo", description="Name of the LLM model to use")
+    google_api_key: str = Field(..., description="API Key for the Google Generative AI") # Renamed from llm_api_key
+    brave_api_key: str = Field(..., description="API Key for the Brave Search API") # Renamed from search_api_key
+    google_llm_model_name: str = Field(default="gemini-pro", description="Name of the Google LLM model to use") # Renamed and updated default
 
 def load_settings() -> AppSettings:
     """Loads settings from environment variables."""
@@ -21,16 +21,26 @@ def load_settings() -> AppSettings:
 
     try:
         settings = AppSettings(
-            llm_api_key=os.getenv("LLM_API_KEY"),
-            search_api_key=os.getenv("SEARCH_API_KEY"),
-            llm_model_name=os.getenv("LLM_MODEL_NAME", "gpt-3.5-turbo") # Provide default
+            google_api_key=os.getenv("GOOGLE_API_KEY"), # Updated env var name
+            brave_api_key=os.getenv("BRAVE_API_KEY"), # Updated env var name
+            google_llm_model_name=os.getenv("GOOGLE_LLM_MODEL_NAME", "gemini-2.5-pro-preview-03-25") # Updated env var name and default
         )
         print("Configuration loaded successfully.")
         return settings
     except ValidationError as e:
         print(f"ERROR: Missing critical environment variables: {e}")
         # Extract missing fields for a clearer message
-        missing_vars = [err['loc'][0] for err in e.errors() if err['type'] == 'value_error.missing']
+        # Updated error message to reflect new variable names
+        missing_vars = []
+        for err in e.errors():
+            if err['type'] == 'value_error.missing':
+                # Map internal field name back to environment variable name
+                field_name = err['loc'][0]
+                if field_name == 'google_api_key':
+                    missing_vars.append("GOOGLE_API_KEY")
+                elif field_name == 'brave_api_key':
+                    missing_vars.append("BRAVE_API_KEY") # Updated env var name
+                # Add other mappings if needed
         if missing_vars:
             print(f"Please set the following environment variables: {', '.join(missing_vars)}")
         raise ValueError(f"Configuration validation failed: {e}") from e

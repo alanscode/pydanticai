@@ -1,6 +1,6 @@
 import os
-# Removed PydanticAI import
-from langchain_openai.chat_models import ChatOpenAI
+# Import Google Generative AI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.language_models.chat_models import BaseChatModel # For type hinting
 
 from .schemas import SummaryResult, ResearchResult
@@ -17,18 +17,20 @@ class SummarizerAgent:
 
     def __init__(self, settings: AppSettings):
         """Initializes the Summarizer Agent with necessary configurations."""
-        if not settings or not settings.llm_api_key:
-             raise ValueError("Valid settings object with LLM API key is required for SummarizerAgent initialization.")
+        # Updated check for Google API Key
+        if not settings or not settings.google_api_key:
+             raise ValueError("Valid settings object with Google API key is required for SummarizerAgent initialization.")
         print("Initializing Summarizer Agent...")
 
-        # Initialize the LangChain LLM first
-        openai_llm = ChatOpenAI(
-            model=settings.llm_model_name,
-            api_key=settings.llm_api_key,
-            temperature=0.3 # Slightly higher temp for summarization creativity
+        # Initialize the LangChain Google Gemini LLM
+        google_llm = ChatGoogleGenerativeAI(
+            model=settings.google_llm_model_name, # Use Google model name from settings
+            google_api_key=settings.google_api_key, # Use Google API key from settings
+            temperature=0.3, # Keep temperature setting
+            convert_system_message_to_human=True # Gemini often requires this
         )
         # Store the initialized LangChain LLM directly
-        self.llm = openai_llm
+        self.llm = google_llm
         print("Summarizer Agent Initialized.")
 
     # --- TDD Anchor: test_summarizer_run ---
